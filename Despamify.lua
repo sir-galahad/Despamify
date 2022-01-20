@@ -37,7 +37,6 @@ end
 SLASH_DESPAM1 = "/despam"
 SLASH_DESPAM2 = "/despamify"
 local function despamify(msg)
-	state = {"on","off"} --values are reversed because they're showing what they will be
 
 	if toggle == 1 then
 		print("Despamify now on")
