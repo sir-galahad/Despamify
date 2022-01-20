@@ -1,5 +1,5 @@
-## Interface: 25341
-## Title: Test Addon
+## Interface: 41813
+## Title: Despamify
 ## Notes: Just playin' around.
 ## Version: 0.1
 Despamify.lua

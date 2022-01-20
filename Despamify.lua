@@ -1,20 +1,45 @@
 local hooks = {}
 local lastlines = {} 
-
+local toggle = 2 -- 2 = on 1 = off
 local function AddMessage(self, message, ...)
-
-	--message includes what appears to be a timestamp 
-	--in the form of seconds since login, substitute it out to compare
-	tmp = string.gsub(message,":[0-9]+:","xxx")
-
+	
+	if(message == nil) then return "" end
+	
+	-- if turned off do no filtering
+	if(toggle == 1) then
+		return hooks[self](self, message, ...)
+	end
+	
+	-- message includes what appears to be a timestamp 
+	-- in the form of seconds since login, substitute it out to compare
+	tmp = string.gsub(message,':[0-9]+:',"xxx")
+	
+	-- don't let the same line through twice
 	if(lastlines[self] ~= tmp) then
 		lastlines[self] = tmp
 		return hooks[self](self, message, ...)
 	end
-	
+
 	return ""
 end
- 
+
+-- register command to toggle whether despamify starts off or on
+SLASH_DESPAM1 = "/despam"
+SLASH_DESPAM2 = "/despamify"
+local function despamify(msg)
+	state = {"on","off"} --values are reversed because they're showing what they will be
+	_G['ChatFrame1'].AddMessage("Despamify now "..state[toggle])
+	print("Despamify now "..state[toggle])
+	if toggle == 1 then
+		toggle = 2
+	else
+		toggle = 1
+	end
+end
+
+SlashCmdList["DESPAM"] = despamify
+
+-- enumerate chat frames, and buffers for the last line in each
 for index = 1, NUM_CHAT_WINDOWS do
 	if(index ~= 2) then
 		local frame = _G['ChatFrame'..index]
