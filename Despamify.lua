@@ -1,22 +1,56 @@
 local hooks = {}
 local lastlines = {} 
 local toggle = 2 -- 2 = on 1 = off
+local MessageClass = {}
+local timeout = 10 -- seconds to filter posts
+function MessageClass:new(obj)
+	setmetatable(obj,self)
+	self.__index = self
+	return obj
+end
+	
 local function AddMessage(self, message, ...)
 	
 	if(message == nil) then return "" end
 	
+	-- message includes what appears to be a timestamp 
+	-- in the form of seconds since login, substitute it out to compare
+	local tmp = string.gsub(message,':[0-9]+:',"xxx",1)
+	
+	-- this bit with the two matches is pretty gross
+	local timestamp = string.match(message, ':([0-9]+):')
+	
+	if ( timestamp == nil) then
+		return hooks[self](self, message, ...)
+	end
+
+	msg = MessageClass:new{message=tmp, timestamp=tonumber(timestamp)}
+
 	-- if turned off do no filtering
 	if(toggle == 1) then
+		lastlines[self] = tmp 
 		return hooks[self](self, message, ...)
 	end
 	
-	-- message includes what appears to be a timestamp 
-	-- in the form of seconds since login, substitute it out to compare
-	tmp = string.gsub(message,':[0-9]+:',"xxx")
 	
-	-- don't let the same line through twice
-	if(lastlines[self] ~= tmp) then
-		lastlines[self] = tmp
+	if(lastlines[tmp] == nil or 
+			lastlines[tmp]["timestamp"] < msg["timestamp"] - timeout) then
+		
+		-- since we know this message has a timestamp, we can use it to 
+		-- in validate older messages
+		toRemove = {}
+		for key, value in ipair(lastlines) do
+			if( msg.timestamp - value.timestamp > timeout) then
+				table.insert(toRemove,key)
+			end
+		end
+
+		for i in values(toRemove) do
+			lastlines[i] = nil
+		}
+	
+		lastlines[tmp] = msg
+		
 		return hooks[self](self, message, ...)
 	end
 
@@ -36,7 +70,7 @@ end
 -- register command to toggle whether despamify starts off or on
 SLASH_DESPAM1 = "/despam"
 SLASH_DESPAM2 = "/despamify"
-local function despamify(msg)
+local function despamify(msg)  
 
 	if toggle == 1 then
 		print("Despamify now on")
