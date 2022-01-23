@@ -15,7 +15,7 @@ local function AddMessage(self, message, ...)
 	
 	-- message includes what appears to be a timestamp 
 	-- in the form of seconds since login, substitute it out to compare
-	local tmp = string.gsub(message,':[0-9]+:',"xxx")
+	local tmp = string.gsub(message,':[0-9]+:',"xxx",1)
 	
 	-- this bit with the two matches is pretty gross
 	local timestamp = string.match(message, ':([0-9]+):')
@@ -29,25 +29,29 @@ local function AddMessage(self, message, ...)
 	-- if turned off do no filtering
 	if(toggle == 1) then
 		lastlines[self] = tmp 
-		return hooks[self](self, "("..channel..'+'..timestamp..")"..message, ...)
+		return hooks[self](self, message, ...)
 	end
 	
 	
 	if(lastlines[tmp] == nil or 
 			lastlines[tmp]["timestamp"] < msg["timestamp"] - timeout) then
-		oldmsg = lastlines[tmp]
-
-		local oldtimeout
-		if(oldmsg ~= nil) then
-			oldtimeout = lastlines[tmp]["timestamp"]
-		else
-			oldtimeout = "nil"
+		
+		-- since we know this message has a timestamp, we can use it to 
+		-- in validate older messages
+		toRemove = {}
+		for key, value in ipair(lastlines) do
+			if( msg.timestamp - value.timestamp > timeout) then
+				table.insert(toRemove,key)
+			end
 		end
 
+		for i in values(toRemove) do
+			lastlines[i] = nil
+		}
+	
 		lastlines[tmp] = msg
 		
-		--print(lastlines[tmp].message)
-		return hooks[self](self, tmp.."("..msg.timestamp.."vs"..oldtimeout..")", ...)
+		return hooks[self](self, message, ...)
 	end
 
 	return ""
