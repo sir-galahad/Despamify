@@ -1,5 +1,7 @@
 ## Interface: 41813
 ## Title: Despamify
-## Notes: Just playin' around.
-## Version: 0.1
+## Notes: Filters spam posts from chat
+## Version: 0.5
+## SavedVariables: despam_toggle, despam_timeout
+## Author: Phobowarrior
 Despamify.lua
