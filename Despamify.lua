@@ -15,7 +15,7 @@ local function AddMessage(self, message, ...)
 	
 	-- message includes what appears to be a timestamp 
 	-- in the form of seconds since login, substitute it out to compare
-	local tmp = string.gsub(message,':[0-9]+:',"xxx",1)
+	local tmp = string.gsub(message,'[^i][^t][^e][^m]:[0-9]+:',"xxx",1)
 	
 	-- this bit with the two matches is pretty gross
 	local timestamp = string.match(message, ':([0-9]+):')
@@ -39,15 +39,15 @@ local function AddMessage(self, message, ...)
 		-- since we know this message has a timestamp, we can use it to 
 		-- in validate older messages
 		toRemove = {}
-		for key, value in ipair(lastlines) do
+		for key, value in ipairs(lastlines) do
 			if( msg.timestamp - value.timestamp > timeout) then
 				table.insert(toRemove,key)
 			end
 		end
 
-		for i in values(toRemove) do
+		for _,i in ipairs(toRemove) do
 			lastlines[i] = nil
-		}
+		end
 	
 		lastlines[tmp] = msg
 		
@@ -70,6 +70,7 @@ end
 -- register command to toggle whether despamify starts off or on
 SLASH_DESPAM1 = "/despam"
 SLASH_DESPAM2 = "/despamify"
+
 local function despamify(msg)  
 
 	if toggle == 1 then
@@ -82,3 +83,5 @@ local function despamify(msg)
 end
 
 SlashCmdList["DESPAM"] = despamify
+
+SLASH_DSTIMER = "/dstimer"
