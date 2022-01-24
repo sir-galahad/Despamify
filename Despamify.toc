@@ -2,6 +2,6 @@
 ## Title: Despamify
 ## Notes: Filters spam posts from chat
 ## Version: 0.5
-## SavedVariables: despam_toggle, despam_timeout
+## SavedVariables: despam_toggle, despam_timeout, despam_strings
 ## Author: Phobowarrior
 Despamify.lua

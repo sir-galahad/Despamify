@@ -1,7 +1,7 @@
 local hooks = {}
 local lastlines = {} 
 local MessageClass = {}
-
+local debug = 0
 function MessageClass:new(obj)
 	setmetatable(obj,self)
 	self.__index = self
@@ -14,7 +14,7 @@ local function AddMessage(self, message, ...)
 	
 	-- message includes what appears to be a timestamp 
 	-- in the form of seconds since login, substitute it out to compare
-	local tmp = string.gsub(message,'[^i][^t][^e][^m]:[0-9]+:',"xxx",1)
+	local tmp = string.gsub(message,'[^i][^t][^e][^m]:[0-9]+:',":xxx:",1)
 	tmp = string.gsub(tmp, '%s+$', '')
 	-- this bit with the two matches is pretty gross
 	local timestamp = time()
@@ -50,10 +50,16 @@ local function AddMessage(self, message, ...)
 			lastlines[i] = nil
 		end	
 		
-		debug = 1
-		if(debug) then
+		if(debug==1) then
+			output = ""
+			for i=1, #message do 
+				char = string.byte(message, i)
+				output = output .. string.format("%x ", char ) 
+			end
+			table.insert(despam_strings, output)
 			message = message .. "( " .. timestamp .. " vs ".. oldTimestamp .. " )"
 		end
+
 		return hooks[self](self, message, ...)
 	end
 
@@ -104,3 +110,15 @@ local function setDespamTimer(msg)
 
 end 
 SlashCmdList["DSTIMER"] = setDespamTimer
+
+SLASH_DSDEBUG1 = "/dsdebug"
+
+local function setDespamTimer(msg)
+	if(msg ~= nil and msg ~= "") then
+		debug = tonumber(msg)
+		despam_strings = {}
+	end
+	print("debug = ", debug)
+
+end 
+SlashCmdList["DSDEBUG"] = setDespamTimer
